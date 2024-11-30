@@ -1,24 +1,309 @@
-# Compiled class file
-*.class
 
-# Log file
-*.log
+import java.awt.*;
+import java.awt.event.*;
+import java.util.HashMap;
 
-# BlueJ files
-*.ctxt
+class Customer {
+    String name;
+    int accountNumber;
+    double meterReading;
+    double totalBill;
+    String password;
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
+    Customer(String name, int accountNumber, double meterReading, String password) {
+        this.name = name;
+        this.accountNumber = accountNumber;
+        this.meterReading = meterReading;
+        this.totalBill = 0.0;
+        this.password = password;
+    }
+}
 
-# Package Files #
-*.jar
-*.war
-*.nar
-*.ear
-*.zip
-*.tar.gz
-*.rar
+public class ElectricityBillingSystem {
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-replay_pid*
+    private static HashMap<Integer, Customer> customers = new HashMap<>();
+    private static double ratePerUnit = 10.0; // Default rate per unit
+
+    public static void main(String[] args) {
+        // Display Welcome Screen
+        showWelcomeScreen();
+    }
+
+    // Display Welcome Screen
+    private static void showWelcomeScreen() {
+        Frame welcomeFrame = new Frame("Electricity Billing System");
+        welcomeFrame.setSize(400, 200);
+        welcomeFrame.setLayout(null);
+
+        Label welcomeLabel = new Label("Welcome to Electricity Billing System", Label.CENTER);
+        Button adminPanelButton = new Button("Admin Panel");
+        Button customerPanelButton = new Button("Customer Panel");
+        Button exitButton = new Button("Exit");
+
+        // Positioning
+        welcomeLabel.setBounds(50, 50, 300, 30);
+        adminPanelButton.setBounds(50, 100, 100, 30);
+        customerPanelButton.setBounds(160, 100, 100, 30);
+        exitButton.setBounds(270, 100, 100, 30);
+
+        welcomeFrame.add(welcomeLabel);
+        welcomeFrame.add(adminPanelButton);
+        welcomeFrame.add(customerPanelButton);
+        welcomeFrame.add(exitButton);
+
+        // Event handlers for buttons
+        adminPanelButton.addActionListener(e -> {
+            welcomeFrame.setVisible(false); // Hide Welcome Screen
+            openAdminPanel();
+        });
+
+        customerPanelButton.addActionListener(e -> {
+            welcomeFrame.setVisible(false); // Hide Welcome Screen
+            openCustomerPanel();
+        });
+
+        exitButton.addActionListener(e -> System.exit(0));
+
+        welcomeFrame.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent windowEvent) {
+                System.exit(0);
+            }
+        });
+
+        welcomeFrame.setVisible(true);
+    }
+
+    // Admin Panel (No Password)
+    private static void openAdminPanel() {
+        Frame adminFrame = new Frame("Admin Panel");
+        adminFrame.setSize(500, 600);
+        adminFrame.setLayout(null);
+
+        // Components for adding a customer
+        Label customerNameLabel = new Label("Customer Name:");
+        TextField customerNameField = new TextField();
+        Label accountNumberLabel = new Label("Account Number:");
+        TextField accountNumberField = new TextField();
+        Label initialReadingLabel = new Label("Initial Meter Reading:");
+        TextField initialReadingField = new TextField();
+        Button addCustomerButton = new Button("Add Customer");
+
+        // Components for updating rate
+        Label rateLabel = new Label("Rate per Unit:");
+        TextField rateField = new TextField();
+        Button updateRateButton = new Button("Update Rate");
+
+        // Components for generating a bill
+        Label billAccountNumberLabel = new Label("Account Number:");
+        TextField billAccountNumberField = new TextField();
+        Label currentReadingLabel = new Label("Current Meter Reading:");
+        TextField currentReadingField = new TextField();
+        Button generateBillButton = new Button("Generate Bill");
+
+        // Output area for messages and bills
+        TextArea outputArea = new TextArea("", 10, 40, TextArea.SCROLLBARS_VERTICAL_ONLY);
+
+        // Back Button
+        Button backButton = new Button("Back");
+
+        // Set positions for all components
+        customerNameLabel.setBounds(50, 50, 150, 20);
+        customerNameField.setBounds(200, 50, 200, 20);
+        accountNumberLabel.setBounds(50, 80, 150, 20);
+        accountNumberField.setBounds(200, 80, 200, 20);
+        initialReadingLabel.setBounds(50, 110, 150, 20);
+        initialReadingField.setBounds(200, 110, 200, 20);
+        addCustomerButton.setBounds(200, 140, 100, 30);
+
+        rateLabel.setBounds(50, 200, 150, 20);
+        rateField.setBounds(200, 200, 200, 20);
+        updateRateButton.setBounds(200, 230, 100, 30);
+
+        billAccountNumberLabel.setBounds(50, 300, 150, 20);
+        billAccountNumberField.setBounds(200, 300, 200, 20);
+        currentReadingLabel.setBounds(50, 330, 150, 20);
+        currentReadingField.setBounds(200, 330, 200, 20);
+        generateBillButton.setBounds(200, 360, 100, 30);
+
+        outputArea.setBounds(50, 420, 400, 150);
+        backButton.setBounds(200, 500, 100, 30);
+
+        // Add all components to the admin frame
+        adminFrame.add(customerNameLabel);
+        adminFrame.add(customerNameField);
+        adminFrame.add(accountNumberLabel);
+        adminFrame.add(accountNumberField);
+        adminFrame.add(initialReadingLabel);
+        adminFrame.add(initialReadingField);
+        adminFrame.add(addCustomerButton);
+        adminFrame.add(rateLabel);
+        adminFrame.add(rateField);
+        adminFrame.add(updateRateButton);
+        adminFrame.add(billAccountNumberLabel);
+        adminFrame.add(billAccountNumberField);
+        adminFrame.add(currentReadingLabel);
+        adminFrame.add(currentReadingField);
+        adminFrame.add(generateBillButton);
+        adminFrame.add(outputArea);
+        adminFrame.add(backButton);
+
+        // Add functionality for adding a customer
+        addCustomerButton.addActionListener(e -> {
+            try {
+                String name = customerNameField.getText().trim();
+                int accountNumber = Integer.parseInt(accountNumberField.getText().trim());
+                double initialReading = Double.parseDouble(initialReadingField.getText().trim());
+
+                customers.put(accountNumber, new Customer(name, accountNumber, initialReading, "")); // Empty password field
+                outputArea.setText("Customer added successfully: " + name);
+            } catch (NumberFormatException ex) {
+                outputArea.setText("Error: Invalid input. Please check your entries.");
+            }
+        });
+
+        // Update the rate per unit
+        updateRateButton.addActionListener(e -> {
+            try {
+                ratePerUnit = Double.parseDouble(rateField.getText().trim());
+                outputArea.setText("Rate updated successfully: " + ratePerUnit);
+            } catch (NumberFormatException ex) {
+                outputArea.setText("Error: Invalid rate. Please enter a valid number.");
+            }
+        });
+
+        // Generate bill functionality
+        generateBillButton.addActionListener(e -> {
+            try {
+                int accountNumber = Integer.parseInt(billAccountNumberField.getText().trim());
+                double currentReading = Double.parseDouble(currentReadingField.getText().trim());
+
+                if (customers.containsKey(accountNumber)) {
+                    Customer customer = customers.get(accountNumber);
+                    if (currentReading >= customer.meterReading) {
+                        double unitsConsumed = currentReading - customer.meterReading;
+                        double totalBill = unitsConsumed * ratePerUnit;
+
+                        customer.totalBill = totalBill;  // Update the total bill for the customer
+                        customer.meterReading = currentReading; // Update the reading
+
+                        outputArea.setText("Bill Generated:\n" +
+                                "Customer Name: " + customer.name + "\n" +
+                                "Units Consumed: " + unitsConsumed + "\n" +
+                                "Rate per Unit: " + ratePerUnit + "\n" +
+                                "Total Bill: $" + totalBill);
+                    } else {
+                        outputArea.setText("Error: Current reading cannot be less than the previous reading.");
+                    }
+                } else {
+                    outputArea.setText("Error: Customer not found.");
+                }
+            } catch (NumberFormatException ex) {
+                outputArea.setText("Error: Invalid input. Please check your entries.");
+            }
+        });
+
+        // Back Button functionality
+        backButton.addActionListener(e -> {
+            adminFrame.setVisible(false); // Hide Admin Panel
+            showWelcomeScreen(); // Show Welcome Screen again
+        });
+
+        // Close window event
+        adminFrame.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent windowEvent) {
+                adminFrame.dispose();
+                showWelcomeScreen(); // Ensure welcome screen is shown when admin panel is closed
+            }
+        });
+
+        adminFrame.setVisible(true);
+    }
+
+    // Customer Panel (No Password)
+    private static void openCustomerPanel() {
+        Frame customerFrame = new Frame("Customer Panel");
+        customerFrame.setSize(400, 250);  // Adjusted size after removing password field
+        customerFrame.setLayout(null);
+
+        Label accountNumberLabel = new Label("Account Number:");
+        TextField accountNumberField = new TextField();
+        Button viewBillButton = new Button("View Bill");
+        Button payBillButton = new Button("Pay Bill");
+        TextArea outputArea = new TextArea("", 10, 40, TextArea.SCROLLBARS_VERTICAL_ONLY);
+
+        // Back Button
+        Button backButton = new Button("Back");
+
+        // Set positions for all components
+        accountNumberLabel.setBounds(50, 50, 150, 20);
+        accountNumberField.setBounds(200, 50, 150, 20);
+        viewBillButton.setBounds(200, 80, 100, 30);
+        payBillButton.setBounds(200, 120, 100, 30);
+        outputArea.setBounds(50, 160, 300, 100);
+        backButton.setBounds(200, 210, 100, 30);
+
+        customerFrame.add(accountNumberLabel);
+        customerFrame.add(accountNumberField);
+        customerFrame.add(viewBillButton);
+        customerFrame.add(payBillButton);
+        customerFrame.add(outputArea);
+        customerFrame.add(backButton);
+
+        // View bill functionality
+        viewBillButton.addActionListener(e -> {
+            try {
+                int accountNumber = Integer.parseInt(accountNumberField.getText().trim());
+
+                if (customers.containsKey(accountNumber)) {
+                    Customer customer = customers.get(accountNumber);
+                    outputArea.setText("Account Details:\n" +
+                            "Name: " + customer.name + "\n" +
+                            "Account Number: " + customer.accountNumber + "\n" +
+                            "Meter Reading: " + customer.meterReading + "\n" +
+                            "Total Bill: $" + customer.totalBill);
+                } else {
+                    outputArea.setText("Error: Customer not found.");
+                }
+            } catch (NumberFormatException ex) {
+                outputArea.setText("Error: Invalid account number.");
+            }
+        });
+
+        // Pay bill functionality
+        payBillButton.addActionListener(e -> {
+            try {
+                int accountNumber = Integer.parseInt(accountNumberField.getText().trim());
+
+                if (customers.containsKey(accountNumber)) {
+                    Customer customer = customers.get(accountNumber);
+                    if (customer.totalBill > 0) {
+                        customer.totalBill = 0;  // Pay the bill
+                        outputArea.setText("Bill Paid successfully. Total Bill is now $0.");
+                    } else {
+                        outputArea.setText("Error: No outstanding bill.");
+                    }
+                } else {
+                    outputArea.setText("Error: Customer not found.");
+                }
+            } catch (NumberFormatException ex) {
+                outputArea.setText("Error: Invalid account number.");
+            }
+        });
+
+        // Back Button functionality
+        backButton.addActionListener(e -> {
+            customerFrame.setVisible(false); // Hide Customer Panel
+            showWelcomeScreen(); // Show Welcome Screen again
+        });
+
+        // Close window event
+        customerFrame.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent windowEvent) {
+                customerFrame.dispose();
+                showWelcomeScreen(); // Ensure welcome screen is shown when customer panel is closed
+            }
+        });
+
+        customerFrame.setVisible(true);
+    }
+}
